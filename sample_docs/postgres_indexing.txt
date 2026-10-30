@@ -1,0 +1,7 @@
+An index in PostgreSQL is a separate data structure that lets the database find rows without scanning the entire table. The default index type is the B-tree, which works well for equality and range comparisons such as equals, less than, greater than, and BETWEEN, and can also support sorting.
+
+Other index types serve specific needs. GIN indexes are designed for values that contain many elements, such as arrays, JSONB documents, and full-text search vectors. GiST indexes support geometric data and nearest-neighbor style searches. BRIN indexes are very small and work well on huge tables where the column values correlate with the physical order of rows, such as an append-only timestamp column. Hash indexes handle only simple equality.
+
+Indexes are not free. Every insert, update, or delete must also update each index on the table, so too many indexes slow down writes and use extra disk space. A partial index covers only rows matching a condition, for example only active orders, which keeps it small and fast. A multicolumn index is most useful when queries filter on its leading columns.
+
+To see whether a query uses an index, run EXPLAIN, or EXPLAIN ANALYZE to execute the query and show real timings. A sequential scan on a small table is normal and often faster than using an index. The planner chooses based on table statistics, which are refreshed by ANALYZE. VACUUM reclaims space from dead rows left behind by updates and deletes, and autovacuum runs it automatically in the background.
