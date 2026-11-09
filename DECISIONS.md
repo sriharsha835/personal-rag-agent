@@ -8,4 +8,17 @@
 - Truncated document_chunks after switching to stable SHA-256 IDs, because intial built hash() rows were orphaned duplicates.
 - One HNSW index only on the embedding column (no IVFFlat) to avoid planner picking the worse index.
 - Kept langgraph 0.2.60 and langchain-core 0.3.28. They install cleanly on Python 3.14 and pass an import check.
+- Chunk IDs are SHA-256 hashes of source and content, so re-running ingestion never duplicates rows (replaced hash()).
+- Kept langgraph 0.2.60 and langchain-core 0.3.28 as planned: they install cleanly on Python 3.14 and pass an import check.
+- Retrieval is separate from answer generation in each technique script, so later parts evals can plug in any technique.
+- Reranking retrieves 10 candidates and keeps the top 3, because the cross-encoder is too slow to score everything.
+- Router prompt lists the corpus topics because the 3B model otherwise sent document questions to direct. Must be kept in sync with the corpus.
+- The direct path has its own prompt (3-sentence cap, 150 tokens, 180s timeout) because generate_answer is context-only and refuses when given no chunks.
+- Renamed the LangGraph node route to router: a node cannot share a name with a state key.
+
+## Observations (to revisit in later parts)
+
+- CRAG graded a relevant chunk as weak for the 99.9 percent SLO question (grader false negative); the final answer was still correct.
+- deep_retrieval shares a node with simple_retrieval, so multi-part questions underperform; decomposition.py answered the same question well. Candidate fix: route deep_retrieval to decomposition and evaluate it.
+- Small-model quirks: RAG-Fusion produced a repeated and a drifting rephrasing; the Adaptive answer expanded SLO as Site Level Objective.
 "@
